@@ -82,7 +82,6 @@ layout_mode = 2
 [node name="NoteBlock" parent="VBoxContainer/ScrollContainer/PanelContainer/VBoxContainer" instance=ExtResource("2_8c7ld")]
 layout_mode = 2
 size_flags_horizontal = 1
-metadata/NoteBlock = true
 
 [node name="NewEntry Button" parent="VBoxContainer/ScrollContainer/PanelContainer/VBoxContainer" instance=ExtResource("3_gymty")]
 layout_mode = 2
