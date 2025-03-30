@@ -1,0 +1,75 @@
+[gd_scene load_steps=3 format=3 uid="uid://ompqv1yn5c4e"]
+
+[ext_resource type="Script" path="res://addons/godot-notebook/scenes/note_block.gd" id="1_v7koe"]
+[ext_resource type="PackedScene" uid="uid://cld4ytm3fmxtm" path="res://addons/godot-notebook/scenes/new_entry.tscn" id="2_1vbjf"]
+
+[node name="NoteBlock" type="HBoxContainer"]
+custom_minimum_size = Vector2(200, 35)
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -960.0
+offset_top = -40.0
+offset_right = 960.0
+offset_bottom = 40.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 0
+script = ExtResource("1_v7koe")
+metadata/NoteBlock = true
+
+[node name="TabOut Button" type="Button" parent="."]
+custom_minimum_size = Vector2(20, 40)
+layout_mode = 2
+size_flags_vertical = 0
+text = "«	"
+
+[node name="TabIn Button" type="Button" parent="."]
+custom_minimum_size = Vector2(20, 40)
+layout_mode = 2
+size_flags_vertical = 0
+text = "»	"
+
+[node name="StaticSpacer" type="Control" parent="."]
+custom_minimum_size = Vector2(5, 0)
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+custom_minimum_size = Vector2(0, 35)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="Button" type="Button" parent="VBoxContainer/HBoxContainer"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+size_flags_vertical = 0
+toggle_mode = true
+text = "   >   "
+alignment = 0
+
+[node name="TextEdit" type="TextEdit" parent="VBoxContainer/HBoxContainer"]
+custom_minimum_size = Vector2(258, 40)
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Enter text here..."
+wrap_mode = 1
+scroll_smooth = true
+
+[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer"]
+visible = false
+layout_mode = 2
+
+[node name="NewEntry Button" parent="VBoxContainer/VBoxContainer" instance=ExtResource("2_1vbjf")]
+layout_mode = 2
+size_flags_vertical = 0
+
+[connection signal="pressed" from="TabOut Button" to="." method="_on_tab_out_button_pressed"]
+[connection signal="pressed" from="TabIn Button" to="." method="_on_tab_in_button_pressed"]
+[connection signal="toggled" from="VBoxContainer/HBoxContainer/Button" to="." method="_on_button_toggled"]
+[connection signal="text_changed" from="VBoxContainer/HBoxContainer/TextEdit" to="." method="_on_text_edit_text_changed"]

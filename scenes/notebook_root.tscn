@@ -1,0 +1,63 @@
+[gd_scene load_steps=4 format=3 uid="uid://43hyrfrf8lln"]
+
+[ext_resource type="PackedScene" uid="uid://ps7cw6jhe56w" path="res://addons/godot-notebook/scenes/new_note.tscn" id="1_8lmma"]
+[ext_resource type="Script" path="res://addons/godot-notebook/scenes/notebook_root.gd" id="1_jb25n"]
+[ext_resource type="PackedScene" uid="uid://b2rll6bdwb01r" path="res://addons/godot-notebook/scenes/sidebar_button_template.tscn" id="2_htpkl"]
+
+[node name="NotebookRoot" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("1_jb25n")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TabContainer" type="TabContainer" parent="HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+current_tab = 0
+
+[node name="NewNote" parent="HBoxContainer/TabContainer" instance=ExtResource("1_8lmma")]
+layout_mode = 2
+metadata/_tab_index = 0
+
+[node name="PanelContainer" type="PanelContainer" parent="HBoxContainer"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="HBoxContainer/PanelContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 24
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/PanelContainer/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Save Button" parent="HBoxContainer/PanelContainer/MarginContainer/VBoxContainer" instance=ExtResource("2_htpkl")]
+layout_mode = 2
+text = "Save"
+
+[node name="Button2" parent="HBoxContainer/PanelContainer/MarginContainer/VBoxContainer" instance=ExtResource("2_htpkl")]
+layout_mode = 2
+
+[node name="Button3" parent="HBoxContainer/PanelContainer/MarginContainer/VBoxContainer" instance=ExtResource("2_htpkl")]
+layout_mode = 2
+
+[node name="Button4" parent="HBoxContainer/PanelContainer/MarginContainer/VBoxContainer" instance=ExtResource("2_htpkl")]
+layout_mode = 2
+
+[connection signal="pressed" from="HBoxContainer/PanelContainer/MarginContainer/VBoxContainer/Save Button" to="." method="_on_save_button_pressed"]
