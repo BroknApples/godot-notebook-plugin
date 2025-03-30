@@ -16,19 +16,19 @@ extends MarginContainer
 #                        * Variables *                         #
 # ************************************************************ #
 
-const spacer_template = preload("res://addons/godot-notebook-plugin/scenes/note_block_spacer.tscn")
+@onready var main_hbox := $HBoxContainer ## HBoxContainer that contains the spacers to correctly tab the Note
+@onready var show_children_button := $HBoxContainer/VBoxContainer/HBoxContainer/Button ## Button that opens and closes the text data
+@onready var text_edit := $HBoxContainer/VBoxContainer/HBoxContainer/TextEdit ## Actual note data
+@onready var child_vbox := $HBoxContainer/VBoxContainer/VBoxContainer ## VBoxContainer that contains all the child note data
+@onready var new_entry_button := $"HBoxContainer/VBoxContainer/VBoxContainer/NewEntry Button"
+@onready var delete_button := $"Delete Button"
 
-@onready var main_hbox = $HBoxContainer ## HBoxContainer that contains the spacers to correctly tab the Note
-@onready var show_children_button = $HBoxContainer/VBoxContainer/HBoxContainer/Button ## Button that opens and closes the text data
-@onready var text_edit = $HBoxContainer/VBoxContainer/HBoxContainer/TextEdit ## Actual note data
-@onready var child_vbox = $HBoxContainer/VBoxContainer/VBoxContainer ## VBoxContainer that contains all the child note data
-@onready var new_entry_button = $"HBoxContainer/VBoxContainer/VBoxContainer/NewEntry Button"
-@onready var delete_button = $"Delete Button"
-
+const spacer_template: PackedScene = preload("res://addons/godot-notebook-plugin/scenes/note_block_spacer.tscn")
 const NOTE_BLOCK_META_TAG: String = "NoteBlock"
 const SPACER_INDEX: int = 3
 const MINIMUM_TEXT_EDIT_HEIGHT: int = 40
 
+var note_tab: MarginContainer ## Which tab of the tab container in notebook root is this connected to
 var tab_level := 0
 var char_count := 0 # TODO
 var word_count := 0 # TODO
@@ -64,7 +64,10 @@ func _on_text_edit_text_changed() -> void:
 ## Delete node -- If there are children, display a prompt
 func _on_delete_button_pressed() -> void:
 	if (child_vbox.get_child_count() > 1):
-		print("This node contains children, deleting it will remove all child nodes... Confirm?")
+		var root = note_tab.get_parent().get_parent().get_parent() # Get notebook root node
+		print(root.get_path())
+		root.deleteChildrenPrompt(self, child_vbox.get_child_count() - 1)
+		return
 	
 	self.queue_free()
 
@@ -101,6 +104,10 @@ func _removeSpacer() -> void:
 
 ## Add a note block meta tag and other misc and set signals
 func _ready() -> void:
+	# Text Edit Changed
+	if (!text_edit.is_connected("text_changed", _on_text_edit_text_changed)):
+		text_edit.connect("text_changed", _on_text_edit_text_changed)
+	
 	# Show Children Button
 	if (!show_children_button.is_connected("toggled", _on_button_toggled)):
 		show_children_button.connect("toggled", _on_button_toggled)
@@ -146,10 +153,20 @@ func getData(tabs: int) -> String:
 	
 	return str
 
+## Add new text block to vbox
+
+func addTextBlock(str: String) -> void:
+	
+
 ## Get the VBoxContainer holding all child nodes
 func getNoteDataVBox() -> VBoxContainer:
 	return child_vbox
 
+## Set this node into delete mode
 func setDeleteMode(delete_mode: bool) -> void:
 	delete_button.visible = delete_mode
 	new_entry_button.disabled = delete_mode
+
+## Set the note of the TabContainer in notebook_root.tscn this is a child of
+func setNote(note: MarginContainer) -> void:
+	note_tab = note

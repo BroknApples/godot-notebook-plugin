@@ -16,12 +16,12 @@ extends MarginContainer
 #                        * Variables *                         #
 # ************************************************************ #
 
-@onready var root = $"."
-@onready var title_line_edit = $"VBoxContainer/HBoxContainer/Title LineEdit"
-@onready var word_count_label = $"VBoxContainer/HBoxContainer/PanelContainer/HBoxContainer/MarginContainer/HBoxContainer/WordCount Label"
-@onready var char_count_label = $"VBoxContainer/HBoxContainer/PanelContainer/HBoxContainer/MarginContainer2/HBoxContainer/CharacterCount Label"
-@onready var note_data_vbox = $VBoxContainer/ScrollContainer/PanelContainer/VBoxContainer
-@onready var new_entry_button = $"VBoxContainer/ScrollContainer/PanelContainer/VBoxContainer/NewEntry Button"
+@onready var root := $"."
+@onready var title_line_edit := $"VBoxContainer/HBoxContainer/Title LineEdit"
+@onready var word_count_label := $"VBoxContainer/HBoxContainer/PanelContainer/HBoxContainer/MarginContainer/HBoxContainer/WordCount Label"
+@onready var char_count_label := $"VBoxContainer/HBoxContainer/PanelContainer/HBoxContainer/MarginContainer2/HBoxContainer/CharacterCount Label"
+@onready var note_data_vbox := $VBoxContainer/ScrollContainer/PanelContainer/VBoxContainer
+@onready var new_entry_button := $"VBoxContainer/ScrollContainer/PanelContainer/VBoxContainer/NewEntry Button"
 
 var total_word_count := 0
 var total_char_count := 0

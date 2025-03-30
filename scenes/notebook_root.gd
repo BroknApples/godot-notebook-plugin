@@ -17,13 +17,19 @@ extends Control
 #                        * Variables *                         #
 # ************************************************************ #
 
-const NEW_NOTE_TEMPLATE := preload("res://addons/godot-notebook-plugin/scenes/new_note.tscn")
-
 @onready var tab_container := $HBoxContainer/TabContainer
 @onready var delete_button := $"HBoxContainer/PanelContainer/MarginContainer/VBoxContainer/Delete Button"
+@onready var delete_menu := $ConfirmDeleteMenu
+@onready var yes_delete_button := $"ConfirmDeleteMenu/VBoxContainer/MarginContainer/HBoxContainer/Yes Button"
+@onready var no_delete_button := $"ConfirmDeleteMenu/VBoxContainer/MarginContainer/HBoxContainer/No Button"
+@onready var open_file_menu := $OpenFileMenu
 
-const NOTES_DIRECTORY = "res://addons/godot-notebook-plugin/notes"
+const NEW_NOTE_TEMPLATE := preload("res://addons/godot-notebook-plugin/scenes/new_note.tscn")
+const NOTE_BLOCK_TEMPLATE := preload("res://addons/godot-notebook-plugin/scenes/note_block.tscn")
+const NOTES_DIRECTORY: String = "res://addons/godot-notebook-plugin/notes"
 
+var save_file_path: String
+var delete_node: Control = null
 var total_word_count := 0
 var total_char_count := 0
 
@@ -33,14 +39,19 @@ var total_char_count := 0
 
 ## Create new file
 func _on_new_button_pressed() -> void:
-	pass # Replace with function body.
+	var new_note = NEW_NOTE_TEMPLATE.instantiate()
+	tab_container.add_child(new_note)
 
+## Open a note file
 func _on_open_button_pressed() -> void:
 	pass # Replace with function body.
 
-
 ## Save data to file
 func _on_save_button_pressed() -> void:
+	# Save file path has not been set yet, so prompt user to set path
+	if (self.has_meta("SaveFilePath") && !self.get_meta("SaveFilePath")):
+		print("Save file path not yet set.")
+	
 	_saveNote()
 
 ## Enter delete mode to delete note blocks
@@ -50,6 +61,16 @@ func _on_delete_button_toggled(toggled_on: bool) -> void:
 	var target_tab = tab_container.get_child(target_tab_index)
 	
 	_enterDeleteMode(target_tab, toggled_on)
+
+## Do delete the node
+func _on_yes_button_pressed() -> void:
+	delete_node.queue_free()
+	delete_menu.visible = false
+
+## Don't delete the node
+func _on_no_button_pressed() -> void:
+	delete_node = null
+	delete_menu.visible = false
 
 # ************************************************************ #
 #                    * Private Functions *                     #
@@ -88,18 +109,84 @@ func _getNotesInDirectory(path: String) -> Array:
 	return note_list
 
 ## Load a note from a file and create a new tab
-func _loadNote(note_name: String) -> void:
-	# Load a note from a file
-	pass
+func _loadNote(note_path: String) -> void:
+	var file = FileAccess.open(note_path, FileAccess.READ)
+	
+	var note_instance = NEW_NOTE_TEMPLATE.instantiate()
+	var tab_index = tab_container.get_child_count()
+	tab_container.add_child(note_instance)
+	
+	if (file):
+		var data := file.get_as_text()
+		var size := data.length()
+		var i := 0 # Index counter
+		var text: String = ""
+		
+		# File always contains
+		# line1: 'Title'
+		# line2: ''
+		while (i < size):
+			if (data[i] == '\n'): break # Not on line2 anymore
+			text += data[i]
+			i += 1
+		i += 1 # Line 2
+		
+		# We should be on line 3 right now
+		var prev_tab_level = 0
+		var curr_tab_level = 0
+		var parent_node: MarginContainer # This is a note block scene instance
+		var curr_node: MarginContainer # This is a note block scene instance
+		while (i < size):
+			if (data[i] == '\t'):
+				# Current char is a tab, so increase tab count
+				curr_tab_level += 1 
+			elif (data[i] == '\n'):
+				# Set previous tab level to current and current tab level to 0
+				# We are on a new line now
+				prev_tab_level = curr_tab_level
+				curr_tab_level = 0
+				
+				# Create new note block
+				if (curr_tab_level > prev_tab_level):
+					# Add at child of current VBoxContainer
+					pass
+				elif (curr_tab_level == prev_tab_level):
+					# Add at current VBoxContainer
+					pass
+				else:
+					# Add at parent VBoxContainer
+					pass
+				
+			else:
+				text += data[i]
+			
+			i += 1
+	else:
+		print("Could not open file: " + file)
 
 ## Save the current note to a file
 func _saveNote() -> void:
+	# TODO: Prohibit these chars
+	# Invalid chars in windows filename
+	# \ (backslash)
+	# / (forward slash)
+	# : (colon)
+	# * (asterisk)
+	# ? (question mark)
+	# " (double quotation mark)
+	# < (less than)
+	# > (greater than)
+	# | (pipe)
+	
 	# Get note data
 	var target_tab_index = tab_container.current_tab
 	if (target_tab_index == -1): return # Invalid tab choice
 	var target_tab = tab_container.get_child(target_tab_index)
+	var title = target_tab.getTitle()
+	if (title == ""): return
 	
-	var filename: String = NOTES_DIRECTORY + "/" + target_tab.getTitle() + ".txt"
+	# Get filename
+	var filename: String = NOTES_DIRECTORY + "/" + title + ".txt"
 	var note_data = _getNoteData(target_tab)
 	
 	# Write to file
@@ -131,8 +218,8 @@ func _getNoteData(target_tab: MarginContainer) -> String:
 
 ## Enter delete mode for the given tab
 func _enterDeleteMode(target_tab: MarginContainer, delete_status: bool) -> void:
-	var vbox: VBoxContainer = target_tab.getNoteDataVBox()
 	target_tab.setDeleteMode(delete_status)
+	var vbox: VBoxContainer = target_tab.getNoteDataVBox()
 	for entry in vbox.get_children():
 		if (entry.has_meta("NoteBlock") && entry.get_meta("NoteBlock")):
 			entry.setDeleteMode(delete_status)
@@ -166,6 +253,7 @@ func _ready() -> void:
 	
 	# Set metadata
 	self.set_meta("NotebookRoot", true)
+	self.set_meta("SaveFilePath", false)
 
 # ************************************************************ #
 #                     * Public Functions *                     #
@@ -174,3 +262,13 @@ func _ready() -> void:
 ## Is the notebook in delete mode?
 func getDeleteMode() -> bool:
 	return delete_button.button_pressed
+
+
+## Display delete children prompt
+## node: Node to delete
+## count: number of children it has
+func deleteChildrenPrompt(node: Control, count: int) -> void:
+	if (open_file_menu.visible): return # Ensure the open file menu can't be visible
+	
+	delete_node = node
+	delete_menu.visible = true

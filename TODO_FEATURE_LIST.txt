@@ -8,3 +8,26 @@ in a special format (prob choose .gdnote extension) that will hold text_size and
 
 3.
 Overall more side buttons(most will be text formatting buttons from number 2)
+
+4.
+Prohibit these chars
+Invalid chars in filename
+	\ (backslash)
+	/ (forward slash)
+	: (colon)
+	* (asterisk)
+	? (question mark)
+	" (double quotation mark)
+	< (less than)
+	> (greater than)
+	| (pipe)
+	TODO: Get OS specific prohibited filenames
+
+5.
+Redo/Undo
+
+6.
+Word wrap button on sidebar
+
+7.
+Make current_tab a variable that changes on a signal notebook_root to increase performance

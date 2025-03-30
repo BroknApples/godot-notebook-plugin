@@ -18,7 +18,7 @@ extends Button
 #                        * Variables *                         #
 # ************************************************************ #
 
-const NOTE_BLOCK_TEMPLATE = preload("res://addons/godot-notebook-plugin/scenes/note_block.tscn")
+const NOTE_BLOCK_TEMPLATE := preload("res://addons/godot-notebook-plugin/scenes/note_block.tscn")
 
 # ************************************************************ #
 #                     * Signal Functions *                     #
@@ -40,14 +40,17 @@ func _on_pressed() -> void:
 	
 	# Add new note block to parent vbox
 	parent.add_child(note_block_instance)
+	parent.move_child(note_block_instance, list_size - 1)
 	
 	# Find root node and set the delete status
 	var node: Control = self
 	while !node.has_meta("NotebookRoot"):
 		node = node.get_parent()
-	note_block_instance.setDeleteMode(node.getDeleteMode())
+	var tab_container = node.get_node("HBoxContainer/TabContainer")
+	var curr_tab = tab_container.get_child(tab_container.current_tab)
 	
-	parent.move_child(note_block_instance, list_size - 1)
+	note_block_instance.setDeleteMode(node.getDeleteMode())
+	note_block_instance.setNote(curr_tab)
 
 # ************************************************************ #
 #                    * Private Functions *                     #
