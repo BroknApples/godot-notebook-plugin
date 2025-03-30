@@ -13,7 +13,7 @@ extends EditorPlugin
 #                        * Variables *                         #
 # ************************************************************ #
 
-const NOTEBOOK_ROOT := preload("res://addons/godot-notebook/scenes/notebook_root.tscn")
+const NOTEBOOK_ROOT := preload("res://addons/godot-notebook-plugin/scenes/notebook_root.tscn")
 var root_instance: Control
 
 # ************************************************************ #

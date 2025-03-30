@@ -1,0 +1,10 @@
+1.
+TabIn/TabOut buttons changing the parent of the current node rather than just visually tabbing
+
+2.
+Text formatting like bold, italic, heading type, font size -- when implemented will have to encode documents
+in a special format (prob choose .gdnote extension) that will hold text_size and stuff kinda like
+\font_size-16{data here}, MUST add export to txt button along with this
+
+3.
+Overall more side buttons(most will be text formatting buttons from number 2)

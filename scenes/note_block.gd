@@ -1,5 +1,5 @@
 @tool
-extends HBoxContainer
+extends MarginContainer
 
 # ************************************************************ #
 #                       * File Purpose *                       #
@@ -16,12 +16,14 @@ extends HBoxContainer
 #                        * Variables *                         #
 # ************************************************************ #
 
-const spacer_template = preload("res://addons/godot-notebook/scenes/note_block_spacer.tscn")
+const spacer_template = preload("res://addons/godot-notebook-plugin/scenes/note_block_spacer.tscn")
 
-@onready var root = $"." ## HBoxContainer that contains the spacers to correctly tab the Note
-@onready var show_children_button = $VBoxContainer/HBoxContainer/Button ## Button that opens and closes the text data
-@onready var text_edit = $VBoxContainer/HBoxContainer/TextEdit ## Actual note data
-@onready var child_vbox = $VBoxContainer/VBoxContainer ## VBoxContainer that contains all the child note data
+@onready var main_hbox = $HBoxContainer ## HBoxContainer that contains the spacers to correctly tab the Note
+@onready var show_children_button = $HBoxContainer/VBoxContainer/HBoxContainer/Button ## Button that opens and closes the text data
+@onready var text_edit = $HBoxContainer/VBoxContainer/HBoxContainer/TextEdit ## Actual note data
+@onready var child_vbox = $HBoxContainer/VBoxContainer/VBoxContainer ## VBoxContainer that contains all the child note data
+@onready var new_entry_button = $"HBoxContainer/VBoxContainer/VBoxContainer/NewEntry Button"
+@onready var delete_button = $"Delete Button"
 
 const NOTE_BLOCK_META_TAG: String = "NoteBlock"
 const SPACER_INDEX: int = 3
@@ -55,7 +57,16 @@ func _on_tab_in_button_pressed() -> void:
 func _on_text_edit_text_changed() -> void:
 	const MIN_HEIGHT: int = 40  # Base height
 	var text_height: int = text_edit.get_line_count() * text_edit.get_line_height() + (MINIMUM_TEXT_EDIT_HEIGHT/3)
-	text_edit.custom_minimum_size.y = max(MIN_HEIGHT, text_height)
+	var height = max(MIN_HEIGHT, text_height)
+	text_edit.custom_minimum_size.y = height
+	delete_button.custom_minimum_size.y = height
+
+## Delete node -- If there are children, display a prompt
+func _on_delete_button_pressed() -> void:
+	if (child_vbox.get_child_count() > 1):
+		print("This node contains children, deleting it will remove all child nodes... Confirm?")
+	
+	self.queue_free()
 
 # ************************************************************ #
 #                    * Private Functions *                     #
@@ -69,29 +80,49 @@ func _setTabLevel(new_tab_level: int) -> void:
 func _addSpacer() -> void:
 	# Create new spacer instance
 	var spacer_instance = spacer_template.instantiate()
-	root.add_child(spacer_instance)
+	main_hbox.add_child(spacer_instance)
 	
 	# Move to front of HBoxContainer
-	root.move_child(spacer_instance,  SPACER_INDEX)
+	main_hbox.move_child(spacer_instance,  SPACER_INDEX)
 	tab_level += 1
 
 ## Remove a spacer from the HBoxContainer that formats the button
 func _removeSpacer() -> void:
 	# Check if there are no spacers
-	if (root.get_child_count() <= 4): return
+	if (main_hbox.get_child_count() <= 4): return
 	
-	var spacer_instance = root.get_child(SPACER_INDEX)
-	root.remove_child(spacer_instance)
+	var spacer_instance = main_hbox.get_child(SPACER_INDEX)
+	main_hbox.remove_child(spacer_instance)
 	tab_level -= 1
 
 # ************************************************************ #
 #                     * Godot Functions *                      #
 # ************************************************************ #
 
-## Add a note block meta tag and other misc
+## Add a note block meta tag and other misc and set signals
 func _ready() -> void:
-	root.set_meta(NOTE_BLOCK_META_TAG, true)
+	# Show Children Button
+	if (!show_children_button.is_connected("toggled", _on_button_toggled)):
+		show_children_button.connect("toggled", _on_button_toggled)
+	
+	# Tab Out Button
+	var tab_out_button = $"HBoxContainer/TabOut Button"
+	if (!tab_out_button.is_connected("pressed", _on_tab_out_button_pressed)):
+		tab_out_button.connect("pressed", _on_tab_out_button_pressed)
+	
+	# Tab In Button
+	var tab_in_button = $"HBoxContainer/TabIn Button"
+	if (!tab_in_button.is_connected("pressed", _on_tab_in_button_pressed)):
+		tab_in_button.connect("pressed", _on_tab_in_button_pressed)
+	
+	# Delete button
+	if (!delete_button.is_connected("pressed", _on_delete_button_pressed)):
+		delete_button.connect("pressed", _on_delete_button_pressed)
+	
+	# Set metadata and minimum size
+	self.set_meta(NOTE_BLOCK_META_TAG, true)
 	text_edit.custom_minimum_size.y = MINIMUM_TEXT_EDIT_HEIGHT
+	
 
 # ************************************************************ #
 #                    * Public Functions *                      #
@@ -100,25 +131,25 @@ func _ready() -> void:
 ## Return the data held in the current
 ## Calls child getData notes as well
 func getData(tabs: int) -> String:
-	# TODO: Fix text formatting
-	var str: String
+	# Set tabs and text data
+	var str: String = "\t".repeat(tabs + tab_level) + text_edit.text
 	
-	# Add tabs
-	for i in range(tabs + tab_level):
-		str += "\t"
+	var child_data := []
+	# Get all child node data
+	for child in child_vbox.get_children():
+		if (child.has_meta(NOTE_BLOCK_META_TAG) && child.get_meta(NOTE_BLOCK_META_TAG)):
+			child_data.append(child.getData(tabs + 1))
 	
-	# Get current node data
-	str += text_edit.text
-	if (child_vbox.get_child_count() > 1):
-		str += '\n'
-		# Get all child node data
-		for child in child_vbox.get_children():
-			if (child.has_meta(NOTE_BLOCK_META_TAG)):
-				str += child.getData(tabs + 1)
-				
-				# If this child node is the last one in the list, then do not add an extra newline
-				if (child != child_vbox.get_child(child_vbox.get_child_count() - 1)):
-					str += '\n'
-			else:
-				print("Invalid child node in note tree.")
+	# Join child data
+	if child_data.size() > 0:
+		str += "\n" + "\n".join(child_data)
+	
 	return str
+
+## Get the VBoxContainer holding all child nodes
+func getNoteDataVBox() -> VBoxContainer:
+	return child_vbox
+
+func setDeleteMode(delete_mode: bool) -> void:
+	delete_button.visible = delete_mode
+	new_entry_button.disabled = delete_mode

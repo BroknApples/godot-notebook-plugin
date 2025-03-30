@@ -5,7 +5,7 @@ extends Button
 #                       * File Purpose *                       #
 # ************************************************************ #
 ## 
-## 
+## Create a new note block entry in a notebook
 ## 
 ## 
 ## 
@@ -18,7 +18,7 @@ extends Button
 #                        * Variables *                         #
 # ************************************************************ #
 
-const NOTE_BLOCK_TEMPLATE = preload("res://addons/godot-notebook/scenes/note_block.tscn")
+const NOTE_BLOCK_TEMPLATE = preload("res://addons/godot-notebook-plugin/scenes/note_block.tscn")
 
 # ************************************************************ #
 #                     * Signal Functions *                     #
@@ -40,6 +40,13 @@ func _on_pressed() -> void:
 	
 	# Add new note block to parent vbox
 	parent.add_child(note_block_instance)
+	
+	# Find root node and set the delete status
+	var node: Control = self
+	while !node.has_meta("NotebookRoot"):
+		node = node.get_parent()
+	note_block_instance.setDeleteMode(node.getDeleteMode())
+	
 	parent.move_child(note_block_instance, list_size - 1)
 
 # ************************************************************ #
@@ -49,3 +56,9 @@ func _on_pressed() -> void:
 # ************************************************************ #
 #                     * Godot Functions *                      #
 # ************************************************************ #
+
+## Ensure the signal is connected, bug has been occurring where it isn't
+func _ready() -> void:
+	# Root Button
+	if (!self.is_connected("pressed", _on_pressed)):
+		self.connect("pressed", _on_pressed)

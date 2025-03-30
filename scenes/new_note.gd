@@ -21,6 +21,7 @@ extends MarginContainer
 @onready var word_count_label = $"VBoxContainer/HBoxContainer/PanelContainer/HBoxContainer/MarginContainer/HBoxContainer/WordCount Label"
 @onready var char_count_label = $"VBoxContainer/HBoxContainer/PanelContainer/HBoxContainer/MarginContainer2/HBoxContainer/CharacterCount Label"
 @onready var note_data_vbox = $VBoxContainer/ScrollContainer/PanelContainer/VBoxContainer
+@onready var new_entry_button = $"VBoxContainer/ScrollContainer/PanelContainer/VBoxContainer/NewEntry Button"
 
 var total_word_count := 0
 var total_char_count := 0
@@ -97,6 +98,24 @@ func _removeUnsavedSymbol() -> void:
 #                     * Godot Functions *                      #
 # ************************************************************ #
 
+## Ensure signals are connected, bug has been occurring where they aren't
+func _ready() -> void:
+	# Title Line Edit
+	if (!title_line_edit.is_connected("text_submitted", _on_title_line_edit_text_submitted)):
+		title_line_edit.connect("text_submitted", _on_title_line_edit_text_submitted)
+	if (!title_line_edit.is_connected("focus_exited", _on_title_line_edit_focus_exited)):
+		title_line_edit.connect("focus_exited", _on_title_line_edit_focus_exited)
+	
+	# Word Count Button
+	var word_count_button = $"VBoxContainer/HBoxContainer/PanelContainer/HBoxContainer/MarginContainer/HBoxContainer/WordCount CheckButton"
+	if (!word_count_button.is_connected("toggled", _on_word_count_check_button_toggled)):
+		word_count_button.connect("toggled", _on_word_count_check_button_toggled)
+	
+	# Character Count button
+	var char_count_button = $"VBoxContainer/HBoxContainer/PanelContainer/HBoxContainer/MarginContainer2/HBoxContainer/CharacterCount CheckButton"
+	if (!char_count_button.is_connected("toggled", _on_character_count_check_button_toggled)):
+		char_count_button.connect("toggled", _on_character_count_check_button_toggled)
+
 # ************************************************************ #
 #                    * Public Functions *                      #
 # ************************************************************ #
@@ -113,3 +132,7 @@ func getTitle() -> String:
 ## Get the VBoxContianer that holds all the note data
 func getNoteDataVBox() -> VBoxContainer:
 	return note_data_vbox
+
+## Disable new entry buton in delete mode
+func setDeleteMode(delete_status: bool) -> void:
+	new_entry_button.disabled = delete_status

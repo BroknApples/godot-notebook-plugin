@@ -5,9 +5,8 @@ extends Control
 #                       * File Purpose *                       #
 # ************************************************************ #
 ## 
-## 
-## 
-## 
+## Root scene of the notebook
+## Will instantiate the rest of the scenes
 ## 
 
 # ************************************************************ #
@@ -18,11 +17,12 @@ extends Control
 #                        * Variables *                         #
 # ************************************************************ #
 
-const NEW_NOTE_TEMPLATE := preload("res://addons/godot-notebook/scenes/new_note.tscn")
+const NEW_NOTE_TEMPLATE := preload("res://addons/godot-notebook-plugin/scenes/new_note.tscn")
 
 @onready var tab_container := $HBoxContainer/TabContainer
+@onready var delete_button := $"HBoxContainer/PanelContainer/MarginContainer/VBoxContainer/Delete Button"
 
-const NOTES_DIRECTORY = "res://addons/godot-notebook/notes"
+const NOTES_DIRECTORY = "res://addons/godot-notebook-plugin/notes"
 
 var total_word_count := 0
 var total_char_count := 0
@@ -31,9 +31,25 @@ var total_char_count := 0
 #                     * Signal Functions *                     #
 # ************************************************************ #
 
+## Create new file
+func _on_new_button_pressed() -> void:
+	pass # Replace with function body.
+
+func _on_open_button_pressed() -> void:
+	pass # Replace with function body.
+
+
 ## Save data to file
 func _on_save_button_pressed() -> void:
 	_saveNote()
+
+## Enter delete mode to delete note blocks
+func _on_delete_button_toggled(toggled_on: bool) -> void:
+	var target_tab_index = tab_container.current_tab
+	if (target_tab_index == -1): return # Invalid tab choice
+	var target_tab = tab_container.get_child(target_tab_index)
+	
+	_enterDeleteMode(target_tab, toggled_on)
 
 # ************************************************************ #
 #                    * Private Functions *                     #
@@ -83,8 +99,19 @@ func _saveNote() -> void:
 	if (target_tab_index == -1): return # Invalid tab choice
 	var target_tab = tab_container.get_child(target_tab_index)
 	
+	var filename: String = NOTES_DIRECTORY + "/" + target_tab.getTitle() + ".txt"
 	var note_data = _getNoteData(target_tab)
-	print("Saving...\n\n" + note_data)
+	
+	# Write to file
+	print("Saving to " + filename)
+	var file = FileAccess.open(filename, FileAccess.WRITE)
+	
+	if (file):
+		file.store_string(note_data)
+		file.close()
+		print("File successfully saved!\n")
+	else:
+		print("Failed to open file: " + filename + "\n")
 
 ## Get the data contained in the current note
 ## target_tab: Target tab node to get the text data from
@@ -102,10 +129,48 @@ func _getNoteData(target_tab: MarginContainer) -> String:
 		str += child.getData(0) + '\n' # Start initial tab level at 0
 	return str
 
+## Enter delete mode for the given tab
+func _enterDeleteMode(target_tab: MarginContainer, delete_status: bool) -> void:
+	var vbox: VBoxContainer = target_tab.getNoteDataVBox()
+	target_tab.setDeleteMode(delete_status)
+	for entry in vbox.get_children():
+		if (entry.has_meta("NoteBlock") && entry.get_meta("NoteBlock")):
+			entry.setDeleteMode(delete_status)
+			
+			if (entry.getNoteDataVBox().get_child_count() > 1):
+				_enterDeleteMode(entry, delete_status)
+
 # ************************************************************ #
 #                     * Godot Functions *                      #
 # ************************************************************ #
 
+func _ready() -> void:
+	# New Button
+	var new_button = $"HBoxContainer/PanelContainer/MarginContainer/VBoxContainer/New Button"
+	if (!new_button.is_connected("pressed", _on_new_button_pressed)):
+		new_button.connect("pressed", _on_new_button_pressed)
+	
+	# Open Button
+	var open_button =$"HBoxContainer/PanelContainer/MarginContainer/VBoxContainer/Open Button"
+	if (!open_button.is_connected("pressed", _on_open_button_pressed)):
+		open_button.connect("pressed", _on_open_button_pressed)
+	
+	# Save Button
+	var save_button = $"HBoxContainer/PanelContainer/MarginContainer/VBoxContainer/Save Button"
+	if (!save_button.is_connected("pressed", _on_save_button_pressed)):
+		save_button.connect("pressed", _on_save_button_pressed)
+	
+	# Delete Button
+	if (!delete_button.is_connected("toggled", _on_delete_button_toggled)):
+		delete_button.connect("toggled", _on_delete_button_toggled)
+	
+	# Set metadata
+	self.set_meta("NotebookRoot", true)
+
 # ************************************************************ #
 #                     * Public Functions *                     #
 # ************************************************************ #
+
+## Is the notebook in delete mode?
+func getDeleteMode() -> bool:
+	return delete_button.button_pressed

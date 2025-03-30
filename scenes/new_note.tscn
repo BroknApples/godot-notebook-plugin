@@ -1,8 +1,8 @@
 [gd_scene load_steps=4 format=3 uid="uid://ps7cw6jhe56w"]
 
-[ext_resource type="Script" path="res://addons/godot-notebook/scenes/new_note.gd" id="1_rhsdd"]
-[ext_resource type="PackedScene" uid="uid://ompqv1yn5c4e" path="res://addons/godot-notebook/scenes/note_block.tscn" id="2_8c7ld"]
-[ext_resource type="PackedScene" uid="uid://cld4ytm3fmxtm" path="res://addons/godot-notebook/scenes/new_entry.tscn" id="3_gymty"]
+[ext_resource type="Script" path="res://addons/godot-notebook-plugin/scenes/new_note.gd" id="1_aj7qb"]
+[ext_resource type="PackedScene" uid="uid://ompqv1yn5c4e" path="res://addons/godot-notebook-plugin/scenes/note_block.tscn" id="2_8c7ld"]
+[ext_resource type="PackedScene" uid="uid://cld4ytm3fmxtm" path="res://addons/godot-notebook-plugin/scenes/new_entry.tscn" id="3_gymty"]
 
 [node name="New Note" type="MarginContainer"]
 anchors_preset = 15
@@ -14,7 +14,7 @@ theme_override_constants/margin_left = 8
 theme_override_constants/margin_top = 8
 theme_override_constants/margin_right = 8
 theme_override_constants/margin_bottom = 8
-script = ExtResource("1_rhsdd")
+script = ExtResource("1_aj7qb")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
 layout_mode = 2
@@ -56,7 +56,7 @@ layout_mode = 2
 [node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/HBoxContainer/PanelContainer/HBoxContainer/MarginContainer2"]
 layout_mode = 2
 
-[node name="CharacterCount CheckButto" type="CheckButton" parent="VBoxContainer/HBoxContainer/PanelContainer/HBoxContainer/MarginContainer2/HBoxContainer"]
+[node name="CharacterCount CheckButton" type="CheckButton" parent="VBoxContainer/HBoxContainer/PanelContainer/HBoxContainer/MarginContainer2/HBoxContainer"]
 layout_mode = 2
 button_pressed = true
 text = "Character
@@ -81,13 +81,11 @@ layout_mode = 2
 
 [node name="NoteBlock" parent="VBoxContainer/ScrollContainer/PanelContainer/VBoxContainer" instance=ExtResource("2_8c7ld")]
 layout_mode = 2
-size_flags_horizontal = 1
 
 [node name="NewEntry Button" parent="VBoxContainer/ScrollContainer/PanelContainer/VBoxContainer" instance=ExtResource("3_gymty")]
 layout_mode = 2
 
 [connection signal="focus_exited" from="VBoxContainer/HBoxContainer/Title LineEdit" to="." method="_on_title_line_edit_focus_exited"]
-[connection signal="text_changed" from="VBoxContainer/HBoxContainer/Title LineEdit" to="." method="_on_title_line_edit_text_changed"]
 [connection signal="text_submitted" from="VBoxContainer/HBoxContainer/Title LineEdit" to="." method="_on_title_line_edit_text_submitted"]
 [connection signal="toggled" from="VBoxContainer/HBoxContainer/PanelContainer/HBoxContainer/MarginContainer/HBoxContainer/WordCount CheckButton" to="." method="_on_word_count_check_button_toggled"]
-[connection signal="toggled" from="VBoxContainer/HBoxContainer/PanelContainer/HBoxContainer/MarginContainer2/HBoxContainer/CharacterCount CheckButto" to="." method="_on_character_count_check_button_toggled"]
+[connection signal="toggled" from="VBoxContainer/HBoxContainer/PanelContainer/HBoxContainer/MarginContainer2/HBoxContainer/CharacterCount CheckButton" to="." method="_on_character_count_check_button_toggled"]

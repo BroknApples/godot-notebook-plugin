@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://cld4ytm3fmxtm"]
 
-[ext_resource type="Script" path="res://addons/godot-notebook/scenes/new_entry.gd" id="1_u1cpd"]
+[ext_resource type="Script" path="res://addons/godot-notebook-plugin/scenes/new_entry.gd" id="1_8rnp2"]
 
 [node name="NewEntry Button" type="Button"]
 custom_minimum_size = Vector2(0, 35)
@@ -17,6 +17,6 @@ grow_horizontal = 2
 grow_vertical = 2
 tooltip_text = "Create a new entry in the notebook"
 text = "+"
-script = ExtResource("1_u1cpd")
+script = ExtResource("1_8rnp2")
 
 [connection signal="pressed" from="." to="." method="_on_pressed"]
