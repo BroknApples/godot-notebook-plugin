@@ -18,7 +18,8 @@ extends Button
 #                        * Variables *                         #
 # ************************************************************ #
 
-const NOTE_BLOCK_TEMPLATE := preload("res://addons/godot-notebook-plugin/scenes/note_block.tscn")
+# TODO: ERROR using this preload for some reason
+#const NOTE_BLOCK_TEMPLATE := preload("res://addons/godot-notebook-plugin/scenes/note_block.tscn")
 
 # ************************************************************ #
 #                     * Signal Functions *                     #
@@ -36,7 +37,8 @@ func _on_pressed() -> void:
 	var list_size := parent.get_child_count()
 	
 	# Create new note block
-	var note_block_instance := NOTE_BLOCK_TEMPLATE.instantiate()
+	var note_block_template := load("res://addons/godot-notebook-plugin/scenes/note_block.tscn")
+	var note_block_instance = note_block_template.instantiate()
 	
 	# Add new note block to parent vbox
 	parent.add_child(note_block_instance)
@@ -49,7 +51,10 @@ func _on_pressed() -> void:
 	var tab_container = node.get_node("HBoxContainer/TabContainer")
 	var curr_tab = tab_container.get_child(tab_container.current_tab)
 	
-	note_block_instance.setDeleteMode(node.getDeleteMode())
+	if (note_block_instance.has_method("setDeleteMode")):
+		note_block_instance.setDeleteMode(node.getDeleteMode())
+	else:
+		print("[GodotNotebookPlugin] ERROR: Could not set newly created text block to delete mode.")
 	note_block_instance.setNote(curr_tab)
 
 # ************************************************************ #
