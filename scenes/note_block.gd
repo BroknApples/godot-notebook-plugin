@@ -156,7 +156,7 @@ func getData(tabs: int) -> String:
 ## Add new text block to vbox
 
 func addTextBlock(str: String) -> void:
-	
+	pass
 
 ## Get the VBoxContainer holding all child nodes
 func getNoteDataVBox() -> VBoxContainer:
